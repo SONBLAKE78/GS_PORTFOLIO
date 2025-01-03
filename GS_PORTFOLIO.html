@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #00D9FF;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body.light {
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #264653;
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: rgba(0, 0, 20, 0.7);
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav a {
+      color: #00D9FF;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+
+    nav button,
+    nav select {
+      padding: 5px 10px;
+      border-radius: 5px;
+      border: 1px solid #00D9FF;
+      background-color: #121212;
+      color: #00D9FF;
+      cursor: pointer;
+    }
+
+    nav button:hover,
+    nav select:hover {
+      background-color: #00D9FF;
+      color: #121212;
+    }
+
+    .content {
+      margin-top: 80px;
+      padding: 20px;
+      text-align: center;
+      background-color: rgba(0, 0, 20, 0.8);
+      margin: 100px auto;
+      border-radius: 10px;
+      max-width: 900px;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+  </style>
+</head>
+
+<body>
+  <nav>
+    <div>
+      <button id="theme-toggle">Mode Clair</button>
+    </div>
+    <div class="nav-center">
+      <a href="#" data-page="home">Accueil</a>
+      <a href="#" data-page="about">À propos</a>
+      <a href="#" data-page="diplomas">Diplômes</a>
+      <a href="#" data-page="experience">Expériences</a>
+      <a href="#" data-page="project">Projets</a>
+      <a href="#" data-page="skills">Compétences</a>
+      <a href="#" data-page="awards">Récompenses</a>
+      <a href="#" data-page="contact">Contact</a>
+    </div>
+    <div>
+      <select id="language-select">
+        <option value="fr" selected>Français</option>
+        <option value="en">English</option>
+        <option value="de">Deutsch</option>
+        <option value="es">Español</option>
+        <option value="ja">日本語</option>
+      </select>
+    </div>
+  </nav>
+
+  <canvas id="matrix"></canvas>
+
+  <div class="content">
+    <h1 id="content-title">Bienvenue dans le Portfolio</h1>
+    <p id="content-body">Ceci est la page d'accueil.</p>
+  </div>
+
+  <script>
+    const contentDict = {
+      home: { title: "Bienvenue dans le Portfolio", content: "Ceci est la page d'accueil." },
+      about: { title: "À propos de moi", content: "Ceci est la page à propos." },
+      diplomas: { title: "Diplômes", content: "Détails sur les diplômes." },
+      experience: { title: "Expériences", content: "Détails sur les expériences." },
+      project: { title: "Projets", content: "Détails sur les projets." },
+      skills: { title: "Compétences", content: "Détails sur les compétences." },
+      awards: { title: "Récompenses", content: "Détails sur les récompenses." },
+      contact: { title: "Contact", content: "Coordonnées de contact." }
+    };
+
+    const defaultLang = "fr";
+    let currentLang = defaultLang;
+
+    const matrixCanvas = document.getElementById('matrix');
+    const ctx = matrixCanvas.getContext('2d');
+    matrixCanvas.width = window.innerWidth;
+    matrixCanvas.height = window.innerHeight;
+    const fontSize = 16;
+    const columns = Math.floor(matrixCanvas.width / fontSize);
+    const drops = Array(columns).fill(0);
+    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+
+    function drawRain() {
+      ctx.fillStyle = 'rgba(0, 0, 20, 0.05)';
+      ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+      ctx.fillStyle = '#00D9FF';
+      ctx.font = `${fontSize}px monospace`;
+      drops.forEach((y, i) => {
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        const x = i * fontSize;
+        ctx.fillText(text, x, y * fontSize);
+        if (y * fontSize > matrixCanvas.height && Math.random() > 0.975) drops[i] = 0;
+        else drops[i]++;
+      });
+    }
+    setInterval(drawRain, 75);
+
+    const themeToggle = document.getElementById('theme-toggle');
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('light');
+      themeToggle.textContent = document.body.classList.contains('light') ? 'Mode Sombre' : 'Mode Clair';
+    });
+
+    const languageSelect = document.getElementById('language-select');
+    languageSelect.addEventListener('change', (e) => {
+      currentLang = e.target.value;
+      updateContent('home');
+    });
+
+    document.querySelectorAll('nav a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const page = e.target.getAttribute('data-page');
+        updateContent(page);
+      });
+    });
+
+    function updateContent(page) {
+      const content = contentDict[page];
+      if (content) {
+        document.getElementById('content-title').textContent = content.title;
+        document.getElementById('content-body').textContent = content.content;
+      } else {
+        document.getElementById('content-title').textContent = "Page non trouvée";
+        document.getElementById('content-body').textContent = "Le contenu pour cette page est manquant.";
+      }
+    }
+  </script>
+</body>
+
+</html>
